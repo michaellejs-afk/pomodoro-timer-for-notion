@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Scholar's Pomodoro</title>
+<style>
+  :root {
+    --ink: #e9dfc9;
+    --muted: #b8aa90;
+    --gold: #b99a62;
+    --gold-soft: #8d754b;
+    --paper: #211d19;
+    --paper-2: #2a241e;
+    --line: rgba(185,154,98,.35);
+    --shadow: rgba(0,0,0,.45);
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    min-height: 100vh;
+    color: var(--ink);
+    background:
+      radial-gradient(circle at 20% 10%, rgba(120,90,50,.12), transparent 30%),
+      radial-gradient(circle at 80% 90%, rgba(70,90,70,.10), transparent 30%),
+      #151310;
+    font-family: Georgia, "Times New Roman", serif;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 28px;
+  }
+
+  .book {
+    width: min(980px, 100%);
+    background: linear-gradient(145deg, rgba(42,36,30,.98), rgba(28,25,21,.98));
+    border: 1px solid var(--line);
+    box-shadow: 0 24px 70px var(--shadow), inset 0 0 80px rgba(0,0,0,.16);
+    padding: 42px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .book::before, .book::after {
+    content: "";
+    position: absolute;
+    pointer-events: none;
+    border: 1px solid rgba(185,154,98,.12);
+  }
+
+  .book::before { inset: 14px; }
+  .book::after { inset: 20px; }
+
+  .content { position: relative; z-index: 1; }
+
+  header {
+    text-align: center;
+    margin-bottom: 30px;
+  }
+
+  .eyebrow {
+    letter-spacing: .28em;
+    text-transform: uppercase;
+    color: var(--gold);
+    font-size: .72rem;
+  }
+
+  h1 {
+    font-size: clamp(2rem, 5vw, 3.4rem);
+    font-weight: normal;
+    margin: 10px 0 4px;
+  }
+
+  .motto {
+    color: var(--muted);
+    font-style: italic;
+    margin: 0;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: 1.15fr .85fr;
+    gap: 24px;
+  }
+
+  .panel {
+    background: rgba(20,18,15,.62);
+    border: 1px solid var(--line);
+    padding: 25px;
+  }
+
+  .timer-wrap { text-align: center; }
+
+  .mode {
+    color: var(--gold);
+    letter-spacing: .18em;
+    text-transform: uppercase;
+    font-size: .78rem;
+    margin-bottom: 14px;
+  }
+
+  .timer {
+    font-variant-numeric: tabular-nums;
+    font-size: clamp(4.8rem, 13vw, 8rem);
+    line-height: .95;
+    margin: 15px 0 24px;
+    text-shadow: 0 5px 22px rgba(0,0,0,.5);
+  }
+
+  .progress {
+    height: 5px;
+    background: #0e0d0b;
+    border: 1px solid rgba(185,154,98,.2);
+    margin: 0 auto 22px;
+    max-width: 560px;
+  }
+
+  .progress-bar {
+    height: 100%;
+    width: 100%;
+    background: var(--gold);
+    transition: width .25s linear;
+  }
+
+  button, input {
+    font: inherit;
+  }
+
+  button {
+    color: var(--ink);
+    background: transparent;
+    border: 1px solid var(--gold-soft);
+    padding: 10px 16px;
+    cursor: pointer;
+    transition: .2s ease;
+  }
+
+  button:hover {
+    background: rgba(185,154,98,.13);
+    border-color: var(--gold);
+  }
+
+  .primary {
+    background: rgba(185,154,98,.16);
+    min-width: 125px;
+  }
+
+  .controls {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 9px;
+  }
+
+  .settings {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-top: 22px;
+  }
+
+  label {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    color: var(--muted);
+    font-size: .8rem;
+    text-align: left;
+  }
+
+  input {
+    width: 100%;
+    color: var(--ink);
+    background: #171512;
+    border: 1px solid rgba(185,154,98,.28);
+    padding: 8px;
+    outline: none;
+  }
+
+  input:focus { border-color: var(--gold); }
+
+  h2 {
+    font-size: 1.25rem;
+    font-weight: normal;
+    margin-top: 0;
+  }
+
+  .quote {
+    color: var(--muted);
+    line-height: 1.55;
+    font-style: italic;
+  }
+
+  .spotify {
+    margin-top: 18px;
+  }
+
+  iframe {
+    width: 100%;
+    height: 152px;
+    border: 0;
+  }
+
+  .session {
+    margin-top: 18px;
+    padding-top: 15px;
+    border-top: 1px solid rgba(185,154,98,.2);
+    color: var(--muted);
+    font-size: .9rem;
+  }
+
+  .session strong { color: var(--ink); }
+
+  .ritual {
+    margin-top: 24px;
+    padding: 18px;
+    border: 1px dashed rgba(185,154,98,.25);
+    color: var(--muted);
+    line-height: 1.7;
+  }
+
+  .ritual b { color: var(--gold); font-weight: normal; }
+
+  footer {
+    text-align: center;
+    color: #887b68;
+    font-size: .72rem;
+    letter-spacing: .12em;
+    margin-top: 26px;
+  }
+
+  @media (max-width: 760px) {
+    .book { padding: 30px 24px; }
+    .grid { grid-template-columns: 1fr; }
+  }
+
+  @media (max-width: 430px) {
+    body { padding: 10px; }
+    .settings { grid-template-columns: 1fr; }
+    .book { padding: 26px 18px; }
+  }
+</style>
+</head>
+<body>
+<main class="book">
+<div class="content">
+<header>
+  <div class="eyebrow">The Scholar's Study</div>
+  <h1>Pomodoro</h1>
+  <p class="motto">Study patiently. Think deeply. Rest deliberately.</p>
+</header>
+
+<div class="grid">
+<section class="panel timer-wrap">
+  <div class="mode" id="mode">Focus</div>
+  <div class="timer" id="timer">25:00</div>
+  <div class="progress"><div class="progress-bar" id="progress"></div></div>
+
+  <div class="controls">
+    <button class="primary" id="start">Begin</button>
+    <button id="reset">Reset</button>
+    <button id="skip">Skip</button>
+  </div>
+
+  <div class="settings">
+    <label>Focus (min)<input id="focusInput" type="number" min="1" max="180" value="25"></label>
+    <label>Short break<input id="shortInput" type="number" min="1" max="60" value="5"></label>
+    <label>Long break<input id="longInput" type="number" min="1" max="90" value="15"></label>
+  </div>
+
+  <div class="session">
+    Session <strong id="session">1</strong> of 4 · Completed <strong id="completed">0</strong>
+  </div>
+</section>
+
+<aside class="panel">
+  <h2>🎧 Study Atmosphere</h2>
+  <p class="quote">A quiet soundtrack for reading, problem sets, writing, and long hours in the library.</p>
+
+  <div class="spotify">
+    <iframe
+      src="https://open.spotify.com/embed/playlist/0IibkkHzHAoSVGWkUA39iF?utm_source=generator&theme=0"
+      allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+      loading="lazy">
+    </iframe>
+  </div>
+
+  <div class="ritual">
+    <b>Before beginning</b><br>
+    Prepare your materials · Silence distractions · Choose one clear objective
+    <br><br>
+    <b>During the break</b><br>
+    Stand · Stretch · Drink water · Rest your eyes
+  </div>
+</aside>
+</div>
+
+<footer>☙ PER ASPERA AD ASTRA ❧</footer>
+</div>
+</main>
+
+<script>
+(() => {
+  const $ = id => document.getElementById(id);
+
+  const state = {
+    mode: "Focus",
+    running: false,
+    remaining: 25 * 60,
+    total: 25 * 60,
+    session: 1,
+    completed: 0,
+    timerId: null
+  };
+
+  function minutes(id, fallback) {
+    const n = Number($(id).value);
+    return Number.isFinite(n) && n > 0 ? Math.min(n, 180) : fallback;
+  }
+
+  function durationFor(mode) {
+    if (mode === "Focus") return minutes("focusInput", 25) * 60;
+    if (mode === "Short Break") return minutes("shortInput", 5) * 60;
+    return minutes("longInput", 15) * 60;
+  }
+
+  function format(seconds) {
+    const m = Math.floor(seconds / 60);
+    const s = seconds % 60;
+    return `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
+  }
+
+  function render() {
+    $("mode").textContent = state.mode;
+    $("timer").textContent = format(state.remaining);
+    $("progress").style.width = `${Math.max(0, Math.min(100, state.remaining / state.total * 100))}%`;
+    $("session").textContent = state.session;
+    $("completed").textContent = state.completed;
+    $("start").textContent = state.running ? "Pause" : "Begin";
+    document.title = `${format(state.remaining)} · ${state.mode}`;
+  }
+
+  function setMode(mode) {
+    state.mode = mode;
+    state.total = durationFor(mode);
+    state.remaining = state.total;
+    state.running = false;
+    clearInterval(state.timerId);
+    state.timerId = null;
+    render();
+  }
+
+  function nextMode() {
+    if (state.mode === "Focus") {
+      state.completed++;
+      if (state.session >= 4) {
+        state.session = 1;
+        setMode("Long Break");
+      } else {
+        setMode("Short Break");
+      }
+    } else {
+      if (state.mode === "Long Break") state.session = 1;
+      else state.session++;
+      setMode("Focus");
+    }
+  }
+
+  function tick() {
+    if (state.remaining > 0) {
+      state.remaining--;
+      render();
+      return;
+    }
+    nextMode();
+    if ("Notification" in window && Notification.permission === "granted") {
+      new Notification("The Scholar's Pomodoro", {
+        body: `${state.mode} begins.`
+      });
+    }
+    try {
+      const ctx = new (window.AudioContext || window.webkitAudioContext)();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain); gain.connect(ctx.destination);
+      osc.frequency.value = 660;
+      gain.gain.value = .08;
+      osc.start();
+      osc.stop(ctx.currentTime + .35);
+    } catch (_) {}
+  }
+
+  $("start").addEventListener("click", async () => {
+    if (state.running) {
+      state.running = false;
+      clearInterval(state.timerId);
+      state.timerId = null;
+    } else {
+      state.running = true;
+      if ("Notification" in window && Notification.permission === "default") {
+        try { await Notification.requestPermission(); } catch (_) {}
+      }
+      state.timerId = setInterval(tick, 1000);
+    }
+    render();
+  });
+
+  $("reset").addEventListener("click", () => {
+    state.running = false;
+    clearInterval(state.timerId);
+    state.timerId = null;
+    state.total = durationFor(state.mode);
+    state.remaining = state.total;
+    render();
+  });
+
+  $("skip").addEventListener("click", nextMode);
+
+  ["focusInput", "shortInput", "longInput"].forEach(id => {
+    $(id).addEventListener("change", () => {
+      if (!state.running) {
+        state.total = durationFor(state.mode);
+        state.remaining = state.total;
+        render();
+      }
+    });
+  });
+
+  render();
+})();
+</script>
+</body>
+</html>
